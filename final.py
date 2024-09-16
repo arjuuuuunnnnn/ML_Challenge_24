@@ -11,22 +11,22 @@ from sentence_transformers import SentenceTransformer
 from fuzzywuzzy import fuzz
 from transformers import pipeline
 
-# Load English tokenizer and entity recognizer from SpaCy
+
 nlp = spacy.load('en_core_web_sm')
 
-# Initialize Chroma DB Client
+
 chroma_client = chromadb.Client()
 
-# Create or get a Chroma DB collection
+
 collection = chroma_client.create_collection(name="entity_vectors")
 
-# Load Sentence-BERT for vectorization
+
 model = SentenceTransformer('all-MiniLM-L6-v2')
 
-# Initialize BERT-based NER pipeline
+
 ner_pipeline = pipeline("ner", model="dbmdz/bert-large-cased-finetuned-conll03-english")
 
-# Define the entity-unit mapping
+
 entity_unit_map = {
     'width': {'centimetre', 'foot', 'inch', 'metre', 'millimetre', 'yard'},
     'depth': {'centimetre', 'foot', 'inch', 'metre', 'millimetre', 'yard'},
@@ -54,7 +54,7 @@ def extract_text_from_image(image_path):
 def extract_entities(text):
     extracted_entities = {}
     
-    # Extract measurement values and units using regex
+    
     pattern = re.compile(r"(\d+\.?\d*)\s*([a-zA-Z]+)")
     
     for match in pattern.finditer(text):
@@ -65,13 +65,13 @@ def extract_entities(text):
             if unit in units:
                 extracted_entities[entity] = f"{float(value):.2f} {unit}"
 
-    # Use SpaCy for additional entity recognition
+   
     doc = nlp(text)
     for ent in doc.ents:
         if ent.label_ not in extracted_entities:
             extracted_entities[ent.label_] = ent.text
 
-    # Use BERT-based NER for additional entity recognition
+    
     ner_results = ner_pipeline(text)
     for result in ner_results:
         if result['entity'] not in extracted_entities:
